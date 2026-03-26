@@ -1,5 +1,6 @@
 package com.springboot.response;
 
+import com.springboot.exception.ExceptionCode;
 import lombok.Getter;
 import org.springframework.validation.BindingResult;
 
@@ -10,6 +11,8 @@ import java.util.stream.Collectors;
 
 @Getter
 public class ErrorResponse {
+    private int status;
+    private String message;
     private List<FieldError> fieldErrors;
     private List<ConstraintViolationError> violationErrors;
 
@@ -19,12 +22,23 @@ public class ErrorResponse {
         this.violationErrors = violationErrors;
     }
 
+    private ErrorResponse(int status, String message){
+        this.status = status;
+        this.message = message;
+        this.fieldErrors = null;
+        this.violationErrors = null;
+
+    }
+
     public static ErrorResponse of(BindingResult bindingResult) {
         return new ErrorResponse(FieldError.of(bindingResult), null);
     }
 
     public static ErrorResponse of(Set<ConstraintViolation<?>> violations) {
         return new ErrorResponse(null, ConstraintViolationError.of(violations));
+    }
+    public static ErrorResponse of(ExceptionCode exceptionCode){
+        return new ErrorResponse(exceptionCode.getStatus(), exceptionCode.getMessage());
     }
 
     @Getter
